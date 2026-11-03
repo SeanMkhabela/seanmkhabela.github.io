@@ -8,6 +8,8 @@
   <meta name="author" content="Sean-Bailey Mkhabela">
   <meta name="theme-color" content="#F0EEE6">
   <meta name="color-scheme" content="light">
+  <!-- Night crayon mode: pick the theme before first paint (saved choice, else the system setting) -->
+  <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem('theme')}catch(e){}if(t!=='night'&&t!=='day')t=matchMedia('(prefers-color-scheme: dark)').matches?'night':'day';d.setAttribute('data-theme',t);if(t==='night')document.querySelector('meta[name=theme-color]').setAttribute('content','#1e2824')})()</script>
   <link rel="canonical" href="https://seanmkhabela.github.io/">
   <meta property="og:type" content="profile">
   <meta property="og:site_name" content="Sean-Bailey Mkhabela">
@@ -56,14 +58,20 @@
       <a class="ink-link u-sky" href="mailto:seanmkhabela@icloud.com">Email</a>
       <a class="ink-link u-purple" href="https://www.linkedin.com/in/sean-bailey-mkhabela-4806b7208/">LinkedIn</a>
       <a class="ink-link u-lime" href="https://github.com/SeanMkhabela">GitHub</a>
+      <button class="theme-toggle" type="button" aria-pressed="false" title="Night crayon mode">
+        <span class="sr-only">Night crayon mode</span>
+        <svg class="ic ic-moon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false"><path d="M20.5 4.6c-6.3.4-11.1 5.6-10.9 11.9.2 6.5 5.6 11.5 12 11.1 2.6-.2 4.9-1.2 6.6-2.9-1.2.4-2.5.6-3.8.5-5.6-.3-9.6-5.2-9.2-10.8.2-4 2.4-7.3 5.3-9.8z" class="glow"/><path d="M20.5 4.6c-6.3.4-11.1 5.6-10.9 11.9.2 6.5 5.6 11.5 12 11.1 2.6-.2 4.9-1.2 6.6-2.9-1.2.4-2.5.6-3.8.5-5.6-.3-9.6-5.2-9.2-10.8.2-4 2.4-7.3 5.3-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 7.4l.4 2.6M4.2 9l2.6-.3M26.6 11.6l.3 1.8M25.8 12.7l1.9-.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="ic ic-sun" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false"><path d="M16.3 9.6c3.5.1 6.3 3.1 6.1 6.6-.2 3.6-3.2 6.2-6.7 6-3.4-.2-6-3.1-5.8-6.5.2-3.5 3-6.2 6.4-6.1z" class="glow" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M16 2.6l.2 3.6M16.1 26.2l-.2 3.3M2.8 16.3l3.5-.2M26 15.9l3.3.1M6.4 6.2l2.5 2.6M23.4 23.3l2.4 2.3M6.7 25.6l2.4-2.5M23.2 8.8l2.6-2.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
     </p>
     <nav aria-label="Chapters">
       <ol class="toc">
         <li><a href="#hello"><span class="n">1</span> Hello</a></li>
         <li><a href="#about"><span class="n">2</span> About</a></li>
         <li><a href="#experience"><span class="n">3</span> Experience</a></li>
-        <li><a href="#toolbox"><span class="n">4</span> Toolbox</a></li>
-        <li><a href="#contact"><span class="n">5</span> Contact</a></li>
+        <li><a href="#how"><span class="n">4</span> How I work</a></li>
+        <li><a href="#toolbox"><span class="n">5</span> Toolbox</a></li>
+        <li><a href="#contact"><span class="n">6</span> Contact</a></li>
       </ol>
     </nav>
   </header>
@@ -103,39 +111,91 @@
       <div class="passage">
         <ol class="roles">
           <li>
-            <h3>Senior Web Developer, <span class="org">Britehouse</span></h3>
-            <p class="when"><time datetime="2026-04">April 2026</time> – present · permanent</p>
+            <img class="logo" src="assets/logos/britehouse.svg" width="40" height="44" alt="Hand-drawn Britehouse logo" decoding="async" loading="lazy">
+            <h3>Software Developer, <span class="org">Britehouse</span></h3>
+            <p class="when"><time datetime="2026">2026</time> – present · permanent</p>
             <p>Building and maintaining Next.js applications with a focus on performance: code splitting, lazy loading and caching. Fixing CI/CD pipeline failures to make builds reliable and deployments faster. Code reviews, production and staging bug fixes, and AI initiatives: evaluating emerging tools and prototyping them into practical solutions.</p>
+            <p class="note"><span class="hl hl-yellow">Ships fixes with AI coding agents: each one lands as a pull request that clears lint, type checks, tests and end-to-end runs before review.</span></p>
           </li>
           <li>
+            <img class="logo" src="assets/logos/multichoice.svg" width="66" height="44" alt="Hand-drawn MultiChoice logo" decoding="async" loading="lazy">
+            <h3>Senior Web Specialist, <span class="org">MultiChoice</span> · via Britehouse</h3>
+            <p class="when"><time datetime="2025">2025</time> – <time datetime="2026">2026</time> · via Britehouse</p>
+            <p>Web development for MultiChoice, the company behind DStv and Showmax and Africa's biggest pay-TV group. Helped build and maintain its high-traffic consumer website, where every change is public the moment it ships.</p>
+          </li>
+          <li>
+            <img class="logo" src="assets/logos/methoddata.svg" width="44" height="44" alt="Hand-drawn MethodData logo" decoding="async" loading="lazy">
             <h3>Software Developer, <span class="org">MethodData (USA)</span></h3>
-            <p class="when"><time datetime="2022-12">December 2022</time> – <time datetime="2025-09">September 2025</time> · remote</p>
+            <p class="when"><time datetime="2022">2022</time> – <time datetime="2025">2025</time> · remote</p>
             <p>React and TypeScript front ends, built from UI/UX wireframes and tuned for speed and cross-browser support. Agile sprints with distributed designers, backend engineers and product managers, and direct meetings with U.S. clients to give technical and feasibility input. Supported junior developers, reviewed code and hosted monthly team-building sessions.</p>
             <p class="note"><span class="hl hl-yellow">Deployed 5+ U.S. web platforms with stable post-launch performance.</span></p>
           </li>
           <li>
+            <img class="logo" src="assets/logos/livestock-wealth.svg" width="44" height="44" alt="Hand-drawn Livestock Wealth logo" decoding="async" loading="lazy">
             <h3>Frontend Engineer → Lead Frontend, <span class="org">Livestock Wealth</span></h3>
-            <p class="when"><time datetime="2022-10">October 2022</time> – <time datetime="2025-02">February 2025</time> · South Africa · fintech</p>
+            <p class="when"><time datetime="2022">2022</time> – <time datetime="2025">2025</time> · South Africa · fintech</p>
             <p>Built React and TypeScript features including the KYC dashboard, onboarding flows and user profile pages. Moved from Junior Developer to Lead Frontend in my second year, owning key features and mentoring teammates. Integrated HubSpot CRM to automate customer lifecycle tracking, and contributed to the launch and growth of livestockwealth.com.</p>
           </li>
           <li>
+            <img class="logo" src="assets/logos/yiya-kude.svg" width="46" height="44" alt="Hand-drawn Yiya Kude wordmark" decoding="async" loading="lazy">
             <h3>Junior Frontend Developer, <span class="org">Yiya Kude</span></h3>
-            <p class="when"><time datetime="2021-06">June 2021</time> – <time datetime="2022-09">September 2022</time> · Johannesburg</p>
+            <p class="when"><time datetime="2021">2021</time> – <time datetime="2022">2022</time> · Johannesburg</p>
             <p>New features for a MERN-based cloud phone system. Prototyped in Figma and Adobe XD to shorten the path from design to code, integrated APIs with the backend team, reduced load times and fixed stability bugs.</p>
           </li>
           <li>
+            <img class="logo" src="assets/logos/mkhbydsgn.svg" width="46" height="44" alt="Hand-drawn MKHBYDSGN monogram" decoding="async" loading="lazy">
             <h3>Freelance Web Developer, <span class="org">MKHBYDSGN</span></h3>
-            <p class="when"><time datetime="2019-01">January 2019</time> – <time datetime="2021-06">June 2021</time></p>
+            <p class="when"><time datetime="2019">2019</time> – <time datetime="2021">2021</time></p>
             <p>Full-stack MERN projects from client brief to deployment and maintenance. SEO-optimised websites and Shopify stores for small businesses, with REST/GraphQL APIs, payment gateways and CRM tools wired in.</p>
           </li>
         </ol>
       </div>
     </section>
 
+    <section class="chapter" id="how" aria-labelledby="how-h">
+      <canvas class="art" data-art="crayon" data-tint="orange" role="img" aria-label="A hand-drawn crayon looping a long, unhurried line across the page"></canvas>
+      <p class="num" aria-hidden="true">4</p>
+      <h2 id="how-h" class="chapter-title">How I work</h2>
+      <div class="passage">
+        <ol class="principles">
+          <li>
+            <h3>Speed is felt, not seen.</h3>
+            <p>I split the code, load what is needed when it is needed, and cache the rest. Nobody should notice the page. It should simply be there.</p>
+          </li>
+          <li>
+            <h3>Let the agents write. Let the tests decide.</h3>
+            <p>I build with AI coding agents, and I trust the process more than the agent. Every change arrives as a pull request that clears lint, type checks, tests and end-to-end runs before review.</p>
+          </li>
+          <li>
+            <h3>Begin together.</h3>
+            <p>Good work starts before the first line of code. I sit with designers and clients to shape what gets built, then help the people beside me grow through review and mentoring.</p>
+          </li>
+        </ol>
+
+        <!--
+          RECOMMENDATIONS (kept hidden until there is at least one real quote. Never invent one.)
+          To publish:
+            1. Fill in one <figure class="kind-word"> per quote:
+                 - the quote: their exact words, with their permission, inside <blockquote><p>…</p></blockquote>
+                 - the person's name in <span class="who">
+                 - their title and company in <span class="what">, e.g. "Engineering Manager, Britehouse"
+            2. Copy the <figure> for each extra quote (two or three is plenty) and delete unused ones.
+            3. Remove the `hidden` attribute from <aside class="kind-words"> below.
+          The notes render as small crayon sticky notes; each one tilts a little differently.
+        -->
+        <aside class="kind-words" aria-labelledby="kind-h" hidden>
+          <h3 id="kind-h" class="kind-title">Kind words</h3>
+          <figure class="kind-word">
+            <blockquote><p>[Quote text]</p></blockquote>
+            <figcaption><span class="who">[Name]</span><span class="what">[Title, Company]</span></figcaption>
+          </figure>
+        </aside>
+      </div>
+    </section>
 
     <section class="chapter" id="toolbox" aria-labelledby="tools-h">
       <canvas class="art" data-art="waves" data-tint="sky" role="img" aria-label="Loose crayon squiggles flowing gently across the page like waves"></canvas>
-      <p class="num" aria-hidden="true">4</p>
+      <p class="num" aria-hidden="true">5</p>
       <h2 id="tools-h" class="chapter-title">Toolbox</h2>
       <div class="passage">
         <dl class="tools">
@@ -152,7 +212,7 @@
 
     <section class="chapter" id="contact" aria-labelledby="contact-h">
       <canvas class="art" data-art="letter" data-tint="purple" role="img" aria-label="A hand-drawn envelope bobbing gently with a small crayon heart above it"></canvas>
-      <p class="num" aria-hidden="true">5</p>
+      <p class="num" aria-hidden="true">6</p>
       <h2 id="contact-h" class="chapter-title">Contact</h2>
       <div class="passage">
         <p>If you're hiring for frontend, product or full-stack work in React, Node and TypeScript, I'd love to hear from you.</p>
@@ -169,7 +229,21 @@
 
   <footer class="colophon">
     <p>© <span id="year">2026</span> Sean-Bailey Mkhabela. Drawn by hand, in code.</p>
+    <p class="psst">
+      <button class="grab-crayon" type="button" aria-pressed="false" aria-controls="doodle-tools">
+        <svg class="crayon-ic" viewBox="0 0 40 16" width="40" height="16" aria-hidden="true" focusable="false"><path class="wax" d="M2.2 8.1l7.6-5.2.2 10.4z"/><path class="wax" d="M9.8 2.9l26.4-.4c1.3 0 1.6 1.9 1.6 5.5s-.2 5.3-1.5 5.4l-26.3-.1"/><path class="wrap" d="M15 3.1l-.2 9.9M30.6 2.7l.1 10.5M17.6 6.4l1.6 2.4 1.6-2.4 1.6 2.4 1.7-2.4 1.6 2.4 1.6-2.4"/></svg>
+        <span class="psst-text">psst, grab a crayon</span>
+      </button>
+    </p>
   </footer>
+
+  <!-- Crayon easter egg: tools appear only while doodling (see main.js) -->
+  <div class="doodle-tools" id="doodle-tools" role="toolbar" aria-label="Doodle tools" hidden>
+    <button type="button" class="dt-color"><span class="swatch" aria-hidden="true"></span><span class="dt-label">colour</span></button>
+    <button type="button" class="dt-clear">clear</button>
+    <button type="button" class="dt-done">done <kbd>esc</kbd></button>
+  </div>
+  <p class="sr-only" id="doodle-status" aria-live="polite"></p>
 
   <script src="main.js" defer></script>
 </body>

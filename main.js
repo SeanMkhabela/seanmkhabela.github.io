@@ -6,8 +6,15 @@
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-const INK = '#333';
+// Crayon colours come from CSS custom properties, so night (chalk) mode recolours every drawing
+let INK = '#333';
 const C = { purple: '#8a4fff', orange: '#ff8a2a', lime: '#8fd43a', sky: '#3fb3f5', yellow: '#ffcf2e' };
+function readPalette() {
+  const cs = getComputedStyle(document.documentElement);
+  INK = cs.getPropertyValue('--ink').trim() || INK;
+  for (const k of Object.keys(C)) C[k] = cs.getPropertyValue('--' + k).trim() || C[k];
+}
+readPalette();
 const BOIL_FPS = 8;   // how often the outlines re-wobble
 const DRAW_FPS = 12;  // hand-animated frame rate
 const S = 400;        // logical canvas size
@@ -169,6 +176,40 @@ const ART = {
     }
   },
 
+  // 4: a crayon looping one long, unhurried line; when it reaches the edge it starts a fresh page
+  crayon(p, t) {
+    const LOOPS = 4.5, DUR = 7, REST = 2.5;
+    const at = (u) => {
+      const a = u * LOOPS * Math.PI * 2;
+      return [52 + u * 236 - Math.sin(a) * 24, 262 - u * 20 + Math.cos(a) * 24 - 24 + Math.sin(u * 5) * 12];
+    };
+    const u = Math.min(1, (t % (DUR + REST)) / DUR);
+    const n = Math.ceil(u * 140);
+    const trail = Array.from({ length: n + 1 }, (_, i) => at(Math.min(u, i / 140)));
+    p.line(trail, { color: C.orange, w: 3.6, amp: 1.1, id: 500 });
+    // little sparkles where it has been
+    for (let s = 0; s < 3; s++) {
+      if (u > .25 + s * .3) {
+        const [sx, sy] = at(.15 + s * .3);
+        p.line(star(sx - 6, sy + 52, 6 + s * 1.5, s), { closed: true, w: 1.7, amp: .6, id: 510 + s, color: s === 1 ? C.yellow : INK });
+      }
+    }
+    // the crayon itself, tip on the line, leaning like it is held
+    const [x, y] = at(u);
+    const r = .36 + Math.sin(t * 2.2) * .05 + (u >= 1 ? .12 : 0);
+    const T = (pts) => xf(pts, x, y - (u >= 1 ? 10 : 0), r);
+    const tip = T([[0, 0], [-13, -30], [13, -30]]);
+    const body = T([[-13, -30], [-15, -150], [15, -150], [13, -30]]);
+    p.hatch(tip, { color: C.orange, gap: 4, id: 520, alpha: .9 });
+    p.hatch(body, { color: C.orange, gap: 6, id: 521, alpha: .55, angle: .7 });
+    p.line(tip, { closed: true, w: 2.4, id: 522 });
+    p.line(body, { closed: true, w: 2.8, id: 523 });
+    p.line(T([[-14, -48], [14, -48]]), { w: 2, id: 524 });
+    p.line(T([[-15, -128], [15, -128]]), { w: 2, id: 525 });
+    p.line(T([[-10, -78], [-5, -88], [0, -78], [5, -88], [10, -78]]), { w: 1.8, amp: .7, id: 526 });
+    p.line(T([[-10, -100], [10, -100]]), { w: 1.4, amp: .7, id: 527 });
+  },
+
   // 5: crayon squiggles drifting like slow waves; one line in colour
   waves(p, t) {
     for (let j = 0; j < 9; j++) {
@@ -280,3 +321,188 @@ window.addEventListener('resize', () => {
   clearTimeout(rt);
   rt = setTimeout(() => scenes.forEach((s) => { s.resize(); render(s, s.phase); }), 150);
 });
+
+// ----- Night crayon mode (chalk on a blackboard) -----
+// The inline <head> script picks the first theme (saved choice, else prefers-color-scheme) before paint.
+const root = document.documentElement;
+const themeBtn = document.querySelector('.theme-toggle');
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const logos = [...document.querySelectorAll('.roles .logo')];
+const repaintListeners = [];
+
+function applyTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  const night = theme === 'night';
+  themeBtn?.setAttribute('aria-pressed', String(night));
+  themeMeta?.setAttribute('content', night ? '#1e2824' : '#F0EEE6');
+  // Chalk versions of the logos live in assets/logos/night/ (scripts/make-night-logos.mjs)
+  for (const img of logos) {
+    const src = img.getAttribute('src').replace('logos/night/', 'logos/');
+    img.setAttribute('src', night ? src.replace('logos/', 'logos/night/') : src);
+  }
+  readPalette();
+  scenes.forEach((s) => render(s, reduceMotion.matches ? s.phase : (performance.now() - start) / 1000 + s.phase));
+  repaintListeners.forEach((fn) => fn());
+}
+applyTheme(root.getAttribute('data-theme') === 'night' ? 'night' : 'day');
+
+themeBtn?.addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'night' ? 'day' : 'night';
+  try { localStorage.setItem('theme', next); } catch (e) { /* private mode: still switch */ }
+  applyTheme(next);
+});
+// Follow the system setting until the visitor picks a theme themselves
+darkQuery.addEventListener?.('change', (e) => {
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (err) { /* ignore */ }
+  if (saved !== 'night' && saved !== 'day') applyTheme(e.matches ? 'night' : 'day');
+});
+
+// ----- Easter egg: grab a crayon and doodle on the page -----
+// Nothing is created until the crayon is first picked up. The overlay only takes pointer
+// events while doodling; otherwise it is pointer-events: none (or absent), so links,
+// text selection and scrolling are untouched. Strokes are stored in page coordinates and
+// redrawn on a viewport-sized canvas, so they scroll with the page without a giant bitmap.
+(() => {
+  const grab = document.querySelector('.grab-crayon');
+  const tools = document.getElementById('doodle-tools');
+  const status = document.getElementById('doodle-status');
+  if (!grab || !tools) return;
+  const btnColor = tools.querySelector('.dt-color');
+  const btnClear = tools.querySelector('.dt-clear');
+  const btnDone = tools.querySelector('.dt-done');
+  const COLORS = ['orange', 'sky', 'purple', 'lime', 'yellow'];
+  let ci = 0, on = false, layer = null, ctx = null, pen = null, dpr = 1, grainPat = null;
+  let strokes = [], cur = null, queued = false, timer = 0, boil = 0;
+
+  const say = (msg) => { status.textContent = ''; setTimeout(() => { status.textContent = msg; }, 30); };
+  const colorName = () => COLORS[ci];
+
+  function cursorFor(color) {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g transform='rotate(225 16 16)' stroke='${INK}' stroke-width='1.4' stroke-linejoin='round'><path d='M16 2.5l-3.6 6.5h7.2z' fill='${color}'/><path d='M12.4 9h7.2v19.5c0 .8-.6 1.2-1.2 1.2h-4.8c-.6 0-1.2-.4-1.2-1.2z' fill='${color}' fill-opacity='.85'/><path d='M12.4 13h7.2M12.4 24.5h7.2' fill='none'/></g></svg>`;
+    return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 6 26, crosshair`;
+  }
+
+  function paintSwatch() {
+    const color = C[colorName()];
+    root.style.setProperty('--crayon', color);
+    btnColor.setAttribute('aria-label', `Crayon colour: ${colorName()}. Next colour`);
+    btnColor.querySelector('.dt-label').textContent = colorName();
+    if (layer) layer.style.cursor = cursorFor(color);
+  }
+
+  function makeLayer() {
+    layer = document.createElement('canvas');
+    layer.className = 'doodle-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(layer);
+    ctx = layer.getContext('2d');
+    pen = makePen(ctx);
+    const g = makeGrain(160);
+    grainPat = ctx.createPattern(g, 'repeat');
+    size();
+    layer.addEventListener('pointerdown', down);
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', () => { size(); schedule(); });
+    repaintListeners.push(() => { paintSwatch(); schedule(); });
+  }
+
+  function size() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    layer.width = Math.round(window.innerWidth * dpr);
+    layer.height = Math.round(window.innerHeight * dpr);
+  }
+
+  function draw() {
+    queued = false;
+    if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, layer.width, layer.height);
+    if (!strokes.length) return;
+    const sx = window.scrollX, sy = window.scrollY, vh = window.innerHeight, vw = window.innerWidth;
+    ctx.setTransform(dpr, 0, 0, dpr, -sx * dpr, -sy * dpr);
+    pen.setBoil(boil);
+    for (const s of strokes) {
+      if (s.maxY < sy - 20 || s.minY > sy + vh + 20 || s.maxX < sx - 20 || s.minX > sx + vw + 20) continue;
+      pen.line(s.pts, { color: C[s.color], w: 6, amp: 1.4, id: s.id });
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = grainPat;
+    ctx.fillRect(0, 0, layer.width, layer.height);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  function schedule() { if (!queued) { queued = true; requestAnimationFrame(draw); } }
+
+  function addPoint(s, x, y) {
+    const last = s.pts[s.pts.length - 1];
+    if (last && Math.hypot(x - last[0], y - last[1]) < 5) return;
+    s.pts.push([x, y]);
+    s.minX = Math.min(s.minX, x); s.maxX = Math.max(s.maxX, x);
+    s.minY = Math.min(s.minY, y); s.maxY = Math.max(s.maxY, y);
+  }
+  function down(e) {
+    if (e.button > 0) return;
+    e.preventDefault();
+    layer.setPointerCapture?.(e.pointerId);
+    const x = e.clientX + window.scrollX, y = e.clientY + window.scrollY;
+    cur = { pts: [], color: colorName(), id: 1000 + strokes.length * 37, minX: x, maxX: x, minY: y, maxY: y };
+    addPoint(cur, x, y);
+    strokes.push(cur);
+    schedule();
+  }
+  function move(e) {
+    if (!cur) return;
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of (evs.length ? evs : [e])) addPoint(cur, ev.clientX + window.scrollX, ev.clientY + window.scrollY);
+    schedule();
+  }
+  function up() { cur = null; }
+
+  // Lines "boil" like the rest of the page while doodling (not under reduced motion)
+  function startBoil() {
+    clearInterval(timer);
+    if (reduceMotion.matches) return;
+    timer = setInterval(() => { if (strokes.length && !document.hidden) { boil = (boil + 1) % 3; schedule(); } }, 1000 / BOIL_FPS);
+  }
+
+  function enter() {
+    if (!layer) makeLayer();
+    on = true;
+    root.classList.add('doodling');
+    grab.setAttribute('aria-pressed', 'true');
+    tools.hidden = false;
+    paintSwatch();
+    startBoil();
+    btnColor.focus();
+    say(`Doodle mode on with a ${colorName()} crayon. Draw anywhere on the page. Press Escape to stop.`);
+  }
+  function exit() {
+    if (!on) return;
+    on = false;
+    cur = null;
+    clearInterval(timer);
+    root.classList.remove('doodling');
+    grab.setAttribute('aria-pressed', 'false');
+    tools.hidden = true;
+    grab.focus({ preventScroll: true });
+    say(strokes.length ? 'Doodle mode off. Your doodles stay until you clear them.' : 'Doodle mode off.');
+  }
+  function nextColor() {
+    ci = (ci + 1) % COLORS.length;
+    paintSwatch();
+    say(`${colorName()} crayon`);
+  }
+
+  grab.addEventListener('click', () => (on ? nextColor() : enter()));
+  btnColor.addEventListener('click', nextColor);
+  btnClear.addEventListener('click', () => { strokes = []; schedule(); say('Doodles cleared.'); });
+  btnDone.addEventListener('click', exit);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && on) exit(); });
+  paintSwatch();
+})();
